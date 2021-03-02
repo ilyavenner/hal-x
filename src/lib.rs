@@ -1,7 +1,23 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+//! An experimental extension over [embedded_hal](https://docs.rs/embedded-hal) crate.
+
+#![no_std]
+
+/// Directions representation.
+pub mod direction;
+
+pub mod switch;
+
+pub mod time;
+
+/// A `hal-x` prelude.
+pub mod prelude;
+
+pub mod button;
+
+pub mod mock {
+    pub use pin::Pin;
+
+    mod pin;
 }
+
+pub mod tick;
