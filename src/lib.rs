@@ -1,4 +1,5 @@
 //! An experimental extension over [embedded_hal](https://docs.rs/embedded-hal) crate.
+//! Currently work in progress.
 
 #![no_std]
 
