@@ -26,6 +26,7 @@ pub struct ButtonFlags {
     mode: bool,
     tick_mode: bool,
     no_pin: bool,
+    counter_reset: bool,
 }
 
 pub struct Button<P, D>
@@ -66,6 +67,7 @@ where
                 mode: false,
                 tick_mode: false,
                 no_pin: false,
+                counter_reset: false,
             },
             btn_counter: 0,
             last_counter: 0,
@@ -73,10 +75,10 @@ where
             btn_timer: 0,
             btn_state: false,
             btn_flag: false,
-            debounce: 0,
-            timeout: 0,
-            click_timeout: 0,
-            step_timeout: 0,
+            debounce: 60,
+            timeout: 500,
+            click_timeout: 500,
+            step_timeout: 400,
         }
     }
 }
@@ -173,8 +175,9 @@ where
             self.tick();
         }*/
         if self.flags.counter && self.last_counter == 1 {
-            self.last_counter = 0;
-            self.flags.counter = false;
+            //		last_counter = 0;
+            //		flags.counter_flag = false;
+            self.flags.counter_reset = true;
             true
         } else {
             false
@@ -186,8 +189,9 @@ where
             self.tick();
         }*/
         if self.flags.counter && self.last_counter == 2 {
-            self.flags.counter = false;
-            self.last_counter = 0;
+            //		last_counter = 0;
+            //		flags.counter_flag = false;
+            self.flags.counter_reset = true;
             true
         } else {
             false
@@ -199,8 +203,9 @@ where
             self.tick();
         }*/
         if self.flags.counter && self.last_counter == 3 {
-            self.flags.counter = false;
-            self.last_counter = 0;
+            //		flags.counter_flag = false;
+            //		last_counter = 0;
+            self.flags.counter_reset = true;
             true
         } else {
             false
@@ -212,7 +217,7 @@ where
             self.tick();
         }*/
         if self.flags.counter {
-            self.flags.counter = false;
+            self.flags.counter_reset = true;
             true
         } else {
             false
@@ -220,20 +225,15 @@ where
     }
 
     pub fn get_clicks(&mut self) -> u32 {
-        let this_count = self.last_counter;
-        self.last_counter = 0;
-        this_count
+        self.flags.counter_reset = true;
+        self.last_counter
     }
 
     pub fn get_hold_clicks(&mut self) -> u32 {
         /*if self.flags.tick_mode {
             self.tick();
         }*/
-        if self.flags.hold {
-            self.last_hold_counter
-        } else {
-            0
-        }
+        self.last_hold_counter
     }
 
     /*pub fn is_step(&mut self, clicks: u8) -> bool {
@@ -328,8 +328,8 @@ where
         {
             self.flags.hold = true;
             self.last_hold_counter = self.btn_counter as u32;
-            //btn_counter = 0;
-            //last_counter = 0;
+            //self.btn_counter = 0;
+            //self.last_counter = 0;
             self.flags.is_holded = true;
             self.flags.step_flag = true;
             self.flags.one_click = false;
@@ -337,10 +337,21 @@ where
         }
 
         // обработка накликивания
-        if (this_mls - self.btn_timer >= self.click_timeout as u128) && (self.btn_counter != 0) {
+        if (this_mls - self.btn_timer >= self.click_timeout as u128)
+            && (self.btn_counter != 0)
+            && !self.btn_state
+        {
+            //И здесь еще добавлен !self.btn_state
             self.last_counter = self.btn_counter as u32;
             self.btn_counter = 0;
             self.flags.counter = true;
+        }
+
+        // сброс накликивания						//Добавлено
+        if self.flags.counter_reset {
+            self.last_counter = 0;
+            self.flags.counter = false;
+            self.flags.counter_reset = false;
         }
 
         Ok(())
